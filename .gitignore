@@ -1,1 +1,4 @@
 .zshrc.local
+
+# Claude Code auto-creates this when run inside the repo; not part of the dotfiles
+.claude/
