@@ -20,7 +20,7 @@ alias -g showhidden="defaults write com.apple.finder AppleShowAllFiles TRUE; kil
 alias -g hidehidden="defaults write com.apple.finder AppleShowAllFiles FALSE; killall Finder"
 alias -g ip="ifconfig | grep "inet " | grep -v 127.0.0.1"
 
-alias -g git="hub"
+command -v hub >/dev/null && alias -g git="hub"
 alias cp='cp -iv'                           # Preferred 'cp' implementation
 alias mv='mv -iv'                           # Preferred 'mv' implementation
 alias mkdir='mkdir -pv'                     # Preferred 'mkdir' implementation
@@ -202,9 +202,11 @@ if command -v pyenv 1>/dev/null 2>&1; then
   eval "$(pyenv init -)"
 fi
 
-source /opt/homebrew/opt/chruby/share/chruby/chruby.sh
-source /opt/homebrew/opt/chruby/share/chruby/auto.sh
-chruby ruby-3.0.3
+if [ -f /opt/homebrew/opt/chruby/share/chruby/chruby.sh ]; then
+  source /opt/homebrew/opt/chruby/share/chruby/chruby.sh
+  source /opt/homebrew/opt/chruby/share/chruby/auto.sh
+  chruby ruby-3   # newest installed 3.x
+fi
 
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 
@@ -212,15 +214,22 @@ export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 
 export PYENV_ROOT="$HOME/.pyenv"
 command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-if which pyenv-virtualenv-init > /dev/null; then eval "$(pyenv virtualenv-init -)"; fi
+if command -v pyenv >/dev/null; then
+  eval "$(pyenv init -)"
+  if command -v pyenv-virtualenv-init >/dev/null; then eval "$(pyenv virtualenv-init -)"; fi
+fi
 
 # pnpm
 export PNPM_HOME="$HOME/Library/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
+# pnpm 11+ keeps binaries in $PNPM_HOME/bin; older versions use $PNPM_HOME
+for _pnpm_dir in "$PNPM_HOME" "$PNPM_HOME/bin"; do
+  [ -d "$_pnpm_dir" ] || continue
+  case ":$PATH:" in
+    *":$_pnpm_dir:"*) ;;
+    *) export PATH="$_pnpm_dir:$PATH" ;;
+  esac
+done
+unset _pnpm_dir
 # pnpm end
 
 # Detect package manager and run command with it
@@ -275,8 +284,10 @@ load-nvmrc() {
     nvm use default
   fi
 }
-add-zsh-hook chpwd load-nvmrc
-load-nvmrc
+if command -v nvm >/dev/null; then
+  add-zsh-hook chpwd load-nvmrc
+  load-nvmrc
+fi
 
 # Rust/cargo
 [ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"

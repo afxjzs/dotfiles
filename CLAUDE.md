@@ -15,7 +15,7 @@ This is a personal dotfiles repository containing shell and git configuration fo
 
 **Package manager helper (`p()`)**: Detects the right package manager by checking for lock files in order: `bun.lockb` → `pnpm-lock.yaml` → `yarn.lock` → `package-lock.json`, defaulting to `pnpm`.
 
-**Runtime managers configured**: nvm (Node), pyenv (Python), chruby (Ruby, defaulting to 3.0.3), conda (miniconda3), pnpm, bun.
+**Runtime managers configured**: nvm (Node), pyenv (Python), chruby (Ruby, defaulting to the newest installed 3.x), conda (miniconda3), pnpm, bun.
 
 **oh-my-zsh plugins**: `git macos ruby golang gem history history-substring-search zsh-syntax-highlighting brew nanoc`
 
